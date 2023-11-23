@@ -1,0 +1,26 @@
+version: "3.3"
+
+services: # la liste des services que l'on va utiliser dans docker compose
+  frdev-api: # le nom du service. Pour le lancer, par exemple, on fera docker compose up -d frdev-api  (le -d pour le lancer en arrière plan, sinon il faut faire ctrl+c pour le stopper)
+    build: . # le chemin vers le Dockerfile
+    ports:
+      - "8000:8000" # le port sur lequel on va accéder à l'application (A gauche : le port sur lequel on va accéder à l'application, à droite : le port sur lequel l'application est exposée dans le container)
+    depends_on:
+      - database # le service dont dépend le service frdev-api. Ici, on attend que le service database soit lancé avant de lancer le service frdev-api
+    include:
+      env_file:
+        - ./.env # le fichier .env qui contient les variables d'environnement
+    #volumes
+
+  database:
+    image: mysql:5.7 # l'image que l'on va utiliser pour le service database. On pourrait builder notre propre image, mais ici on va utiliser une image existante
+    restart: always # on veut que le service database soit toujours lancé. Si ton serveur redémarre, le service database sera relancé automatiquement(sauf si tu fais un docker compose down !)
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./.env
+    volumes:
+      - ./frapi-data:/var/lib/mysql # on va monter un volume pour que les données de la base de données soient persistantes.
+
+volumes:
+  frapi-data:
